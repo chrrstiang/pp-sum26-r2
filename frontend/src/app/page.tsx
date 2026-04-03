@@ -1,7 +1,32 @@
 'use client';
 
 import { useState } from 'react';
-import { search, Venue, SearchResponse } from '@/api/search';
+
+interface Venue {
+  id: number;
+  name: string;
+  minBudget: number | null;
+  maxGuestCount: number | null;
+  location: string;
+  availableDays: string[];
+  openTimes: string[];
+  occasions: string[];
+}
+
+interface ExtractedFilters {
+  budget?: number | null;
+  guestCount?: number | null;
+  location?: string | null;
+  day?: string | null;
+  time?: string | null;
+  occasion?: string | null;
+}
+
+interface SearchResponse {
+  venues: Venue[];
+  appliedFilters: string[];
+  validationMessage?: string;
+}
 
 export default function Home() {
   const [query, setQuery] = useState('');
@@ -16,7 +41,13 @@ export default function Home() {
     setError(null);
     setResult(null);
     try {
-      const data = await search(query);
+      const res = await fetch('http://localhost:3001/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query }),
+      });
+      if (!res.ok) throw new Error(`Server error: ${res.status}`);
+      const data: SearchResponse = await res.json();
       setResult(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
