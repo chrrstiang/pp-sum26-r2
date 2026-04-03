@@ -30,7 +30,7 @@ export interface SearchResponse {
 }
 
 @Injectable()
-export class AppService {
+export class VenueService {
   private venues: Venue[];
   private openai: OpenAI;
 
@@ -38,10 +38,6 @@ export class AppService {
     const venuesPath = path.resolve(process.cwd(), '../venues.json');
     this.venues = JSON.parse(fs.readFileSync(venuesPath, 'utf-8'));
     this.openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-  }
-
-  getHello(): string {
-    return 'Hello World!';
   }
 
   async searchVenues(query: string): Promise<SearchResponse> {
@@ -66,6 +62,11 @@ export class AppService {
     const filters: ExtractedFilters = JSON.parse(
       completion.choices[0].message.content ?? '{}',
     );
+
+    const message = completion.choices[0].message;
+
+    console.log('Completion:', JSON.parse(message.content || '{}'));
+    console.log('Filters:', filters);
 
     // Build human-readable filter labels
     const appliedFilters: string[] = [];
